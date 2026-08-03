@@ -13,7 +13,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # إعطاء الصلاحيات اللازمة لإنشاء الإصدار ورفع الملفات
     permissions:
       contents: write
 
@@ -34,6 +33,21 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      # التعديل الأول: إضافة --split-per-abi لتقسيم التطبيق وتقليل حجمه
+      - name: Build Split APKs
+        run: flutter build apk --release --split-per-abi
+
+      # التعديل الثاني: رفع جميع النسخ المصغرة
+      - name: Create Release and Upload APK
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' 
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          name: الإصدار v1.0.${{ github.run_number }}
+          # استخدمنا علامة النجمة (*) لرفع جميع ملفات الـ APK المصغرة
+          files: build/app/outputs/flutter-apk/app-*-release.apk
 
       - name: Build APK
         run: flutter build apk --release
