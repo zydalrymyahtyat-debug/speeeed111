@@ -12,8 +12,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    # إضافة الصلاحيات المطلوبة لتتمكن الأداة من إنشاء إصدار جديد
+
+    # إعطاء الصلاحيات اللازمة لإنشاء الإصدار ورفع الملفات
     permissions:
       contents: write
 
@@ -38,22 +38,16 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
-      # الخطوة الجديدة: النشر إلى قسم الإصدارات (Releases)
+      # خطوة إنشاء الإصدار ورفع ملف الـ APK
       - name: Create Release and Upload APK
         uses: softprops/action-gh-release@v2
-        # هذا الشرط يضمن أن النشر يتم فقط عند الدمج أو الدفع المباشر لفرع main وليس في الـ Pull Requests
+        # يمنع النشر عند عمل Pull Request
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' 
         with:
-          # استخدام رقم التشغيل لإنشاء اسم مميز لكل إصدار تلقائياً
+          # تحديد اسم الـ Tag ورقم الإصدار بناءً على رقم التشغيل
           tag_name: v1.0.${{ github.run_number }}
+          # توجيه GitHub لإنشاء الـ Tag على آخر تعديل لتجنب رسالة الخطأ
+          target_commitish: ${{ github.sha }}
           name: الإصدار v1.0.${{ github.run_number }}
-          # مسار ملف الـ APK التلقائي الذي يقوم Flutter بإنشائه
+          # مسار ملف الـ APK المراد رفعه
           files: build/app/outputs/flutter-apk/app-release.apk
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/app/outputs/flutter-apk/app-release.apk
-          name: Release ${{ github.ref_name }}
-          generate_release_notes: true
-          draft: false
-          prerelease: false
