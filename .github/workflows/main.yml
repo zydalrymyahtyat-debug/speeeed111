@@ -21,7 +21,6 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          # أعدنا الإصدار إلى 17 ليتوافق مع AGP 8.11 الموجود في مشروعك
           java-version: '17' 
 
       - name: Set up Flutter
@@ -36,8 +35,10 @@ jobs:
         run: flutter clean
 
       - name: Build APK
-        # أبقينا على وضع التجربة لتخطي مشكلة مفاتيح التوقيع
-        run: flutter build apk --debug -v 
+        env:
+          # هذا السطر تم إضافته لزيادة الذاكرة وحل مشكلة Java heap space
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4G -XX:MaxMetaspaceSize=512m"
+        run: flutter build apk --debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
