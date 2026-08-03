@@ -1,17 +1,21 @@
-name: Build and Publish Flutter APK
+name: Build and Release Flutter APK
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # إضافة الصلاحيات المطلوبة لتتمكن الأداة من إنشاء إصدار جديد
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -34,6 +38,17 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
+      # الخطوة الجديدة: النشر إلى قسم الإصدارات (Releases)
+      - name: Create Release and Upload APK
+        uses: softprops/action-gh-release@v2
+        # هذا الشرط يضمن أن النشر يتم فقط عند الدمج أو الدفع المباشر لفرع main وليس في الـ Pull Requests
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' 
+        with:
+          # استخدام رقم التشغيل لإنشاء اسم مميز لكل إصدار تلقائياً
+          tag_name: v1.0.${{ github.run_number }}
+          name: الإصدار v1.0.${{ github.run_number }}
+          # مسار ملف الـ APK التلقائي الذي يقوم Flutter بإنشائه
+          files: build/app/outputs/flutter-apk/app-release.apk
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
