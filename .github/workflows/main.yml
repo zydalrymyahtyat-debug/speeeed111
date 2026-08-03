@@ -44,14 +44,3 @@ jobs:
         with:
           name: app-debug.apk
           path: build/app/outputs/flutter-apk/app-debug.apk
-        run: flutter clean
-
-      # تم التعديل هنا: إضافة "-v" لطباعة تفاصيل الخطأ في حال فشل البناء مرة أخرى
-      - name: Build APK
-        run: flutter build apk --debug -v
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug.apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
