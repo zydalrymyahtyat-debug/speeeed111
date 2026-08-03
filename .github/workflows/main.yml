@@ -53,3 +53,22 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+      # --- التعديل فقط في قسم النشر ---
+
+      # 1. رفع الملف لتتمكن من تحميله مباشرة من صفحة الأكشن
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      # 2. النشر كإصدار (Release) فقط عند رفع Tag جديد
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk
+          name: Release ${{ github.ref_name }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
